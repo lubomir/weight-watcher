@@ -67,8 +67,8 @@ getPort :: IO (Maybe Int)
 getPort = do
     args <- getArgs
     case args of
-        [mport] -> return $ if (all isDigit mport)
-                                then (Just $ read mport)
+        [mport] -> return $ if all isDigit mport
+                                then Just $ read mport
                                 else Nothing
         _ -> return Nothing
 
