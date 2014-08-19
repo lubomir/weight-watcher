@@ -1,0 +1,60 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script type="text/javascript"
+  src="dygraph-combined.js"></script>
+<style>
+.dygraph-axis-label.dygraph-axis-label-x {
+    width: 60px;
+    font-size: 10px;
+}
+.dygraph-rangesel-fgcanvas, .dygraph-rangesel-bgcanvas, .dygraph-rangesel-zoomhandle {
+    margin-top: 1em;
+}
+</style>
+</head>
+<body>
+<div id="graphdiv"
+  style="width:95%; height:85%;"></div>
+<script type="text/javascript">
+  g = new Dygraph(
+    document.getElementById("graphdiv"),
+    "data.csv", // path to CSV file
+    {
+        showRangeSelector: true,
+        rightGap: 6,
+        leftGap: 6,
+        colors: ['#ccc', '#204a87'],
+        "Weight": {
+            drawPoints: true,
+            strokeWidth: 0
+        },
+        axes: {
+            x: {
+                axisLabelFormatter: function(x, gran) {
+                    var months = ['led', 'ún', 'bře', 'dub', 'kvě', 'čer',
+                    'čec', 'srp', 'zář', 'říj', 'lis', 'pro'];
+                    switch (gran) {
+                    case Dygraph.MONTHLY:
+                        return months[x.getMonth()] + "<br>" + x.getFullYear();
+                    case Dygraph.YEARLY:
+                        return x.getFullYear();
+                    }
+                    var day = x.getDate();
+                    return day + ".&nbsp;" + months[x.getMonth()] + "<br>" + x.getFullYear();
+                }
+            }
+        }
+    }
+  );
+  g.ready(function() {
+      var num = g.numRows();
+      if (num >= 28) {
+          var last = g.getValue(num - 1, 0);
+          var first = g.getValue(num > 28 ? num - 28 : 0, 0);
+          g.updateOptions({dateWindow: [first, last]});
+      }
+  });
+</script>
+</body>
+</html>
