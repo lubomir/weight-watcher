@@ -20,7 +20,7 @@ executable weight-watcher
   -- other-modules:       
   -- other-extensions:    
   ghc-options:       -Wall
-  build-depends:       base >=4.6 && <4.7
+  build-depends:       base
                      , scotty
                      , wai-extra
                      , transformers
