@@ -26,6 +26,7 @@
         rightGap: 6,
         leftGap: 6,
         pointSize: 2,
+        panEdgeFraction: 0.01,
         "Weight": {
             drawPoints: true,
             strokeWidth: 0
@@ -53,7 +54,7 @@
       if (num >= 28) {
           var last = g.getValue(num - 1, 0);
           var first = g.getValue(num > 28 ? num - 28 : 0, 0);
-          g.updateOptions({dateWindow: [first, last]});
+          g.updateOptions({dateWindow: [first, 1.01 * last - 0.01 * first]});
       }
   });
 </script>
