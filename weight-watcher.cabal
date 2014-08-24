@@ -36,12 +36,13 @@ executable weight-watcher
                      , persistent
                      , persistent-postgresql
                      , persistent-template
-                     , heroku
                      , monad-logger
                      , resourcet
                      , text
                      , text-format
                      , monad-control
+                     , double-conversion < 2.0.1
+                     , network-uri
   if flag(sqlite)
       build-depends:   sqlite
                      , persistent-sqlite
