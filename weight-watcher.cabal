@@ -15,6 +15,11 @@ build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
 
+Flag sqlite
+    description:    Use sqlite instead of postgres
+    default:        False
+
+
 executable weight-watcher
   main-is:             Main.hs
   -- other-modules:       
@@ -28,10 +33,8 @@ executable weight-watcher
                      , aeson
                      , bytestring
                      , old-locale
-                     , sqlite
                      , persistent
                      , persistent-postgresql
-                     , persistent-sqlite
                      , persistent-template
                      , heroku
                      , monad-logger
@@ -39,5 +42,9 @@ executable weight-watcher
                      , text
                      , text-format
                      , monad-control
+  if flag(sqlite)
+      build-depends:   sqlite
+                     , persistent-sqlite
+      cpp-options: -DSQLite
   -- hs-source-dirs:      
   default-language:    Haskell2010
