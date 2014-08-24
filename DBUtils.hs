@@ -33,7 +33,7 @@ import           Web.Heroku                  (dbConnParams)
 connectDB :: forall a. (ConnectionPool -> IO a) -> IO a
 connectDB act = do
     params <- dbConnParams
-    let connStr = foldr (\(k,v) t -> t <> (encodeUtf8 $ k <> "=" <> v <> " "))
+    let connStr = foldr (\(k,v) t -> t <> encodeUtf8 (k <> "=" <> v <> " "))
                   "" params
     withPostgresqlPool connStr 1 act
 
