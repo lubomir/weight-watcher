@@ -8,7 +8,7 @@ version:             0.1.0.0
 license:             BSD3
 license-file:        LICENSE
 author:              Lubomír Sedlář
-maintainer:          lsedlar@redhat.com
+maintainer:          lubomir.sedlar@gmail.com
 -- copyright:           
 category:            Web
 build-type:          Simple
