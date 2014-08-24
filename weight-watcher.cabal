@@ -38,5 +38,6 @@ executable weight-watcher
                      , resourcet
                      , text
                      , text-format
+                     , monad-control
   -- hs-source-dirs:      
   default-language:    Haskell2010

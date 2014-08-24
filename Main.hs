@@ -13,14 +13,13 @@ import qualified Data.Text.Lazy                       as T
 import           Data.Time
 import           Database.Persist                     hiding (get)
 import           Database.Persist.Sql                 hiding (get)
-import           Database.Persist.Sqlite              hiding (get)
 import           Network.Wai.Middleware.RequestLogger
 import           System.Environment
 import           System.Locale                        (defaultTimeLocale)
 import           Web.Scotty
 
+import DBUtils
 import Model
---import DBUtils
 
 data InputRecord = InputRecord { date :: UTCTime
                                , weight :: Double
@@ -52,9 +51,8 @@ renderRecords rs = T.concat (names : map conv rs)
                                              )
 
 main :: IO ()
-main = do
+main = connectDB $ \pool -> do
     port <- maybe 3000 read <$> lookupEnv "PORT"
-    pool <- createSqlitePool "db.sqlite" 1
     runNoLoggingT $ runSqlPool (runMigration migrateAll) pool
     let runDB = liftIO . runNoLoggingT . runResourceT . flip runSqlPool pool
 
