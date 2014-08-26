@@ -25,11 +25,11 @@ connectDB = withSqlitePool "db.sqlite" 1
 
 #else
 
-import Prelude hiding (foldr)
 import           Data.Monoid                 ((<>))
-import qualified Data.Text as T
+import qualified Data.Text                   as T
 import           Data.Text.Encoding          (encodeUtf8)
 import           Database.Persist.Postgresql (withPostgresqlPool)
+import           Prelude                     hiding (foldr)
 import           Web.Heroku                  (dbConnParams)
 
 connectDB :: forall a. (ConnectionPool -> IO a) -> IO a
