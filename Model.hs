@@ -12,7 +12,6 @@
 module Model where
 
 import           Data.Time           (UTCTime)
-import           Database.Persist
 import           Database.Persist.TH
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
