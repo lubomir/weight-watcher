@@ -41,8 +41,7 @@ executable weight-watcher
                      , text
                      , text-format
                      , monad-control
-                     , double-conversion < 2.0.1
-                     , network-uri
+                     , heroku >= 0.1.2.1
   if flag(sqlite)
       build-depends:   sqlite
                      , persistent-sqlite
