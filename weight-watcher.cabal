@@ -27,7 +27,6 @@ executable weight-watcher
                      , transformers
                      , time
                      , aeson
-                     , bytestring
                      , old-locale
                      , persistent
                      , persistent-postgresql
@@ -36,7 +35,6 @@ executable weight-watcher
                      , resourcet
                      , text
                      , text-format
-                     , monad-control
                      , heroku >= 0.1.2.1
                      , mtl
                      , data-default
