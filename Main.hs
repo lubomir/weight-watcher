@@ -1,14 +1,23 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main (main) where
 
+import           Data.Monoid
+import           Data.Text.Lazy              (Text)
 import qualified Database.Persist            as DB
 import qualified Database.Persist.Postgresql as DB
 import           Network.HTTP.Types.Status   (created201)
-import           Web.Scotty.Trans            (file, get, json, jsonData, post,
-                                              setHeader, status, param)
+import           Web.Scotty.Trans            (capture, file, get, json,
+                                              jsonData, param, post, setHeader,
+                                              status)
 
 import Model
 import WebService
+
+serveDir :: FilePath -> Text -> Handler
+serveDir dir mime = get (capture $ "/" <> dir <> "/:filename") $ do
+    filename <- param "filename"
+    setHeader "Content-Type" mime
+    file (dir <> "/" <> filename)
 
 main :: IO ()
 main = runService $ do
@@ -16,10 +25,8 @@ main = runService $ do
     get "/" $ do
         setHeader "Content-Type" "text/html"
         file "index.html"
-    get "/js/:file" $ do
-        setHeader "Content-Type" "text/javascript"
-        jsFile <- param "file"
-        file $ "js/" ++ jsFile
+    serveDir "js" "text/javascript"
+    serveDir "css" "text/css"
     get "/data.json" $ do
         rs <- runDB $ DB.selectList [] [DB.Asc RecordDate]
         json rs

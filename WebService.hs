@@ -48,6 +48,8 @@ type Error = Text
 
 type Action = ActionT Error ConfigM ()
 
+type Handler = ScottyT Error ConfigM ()
+
 runDB :: (MonadTrans t, MonadIO (t ConfigM))
       => DB.SqlPersistT IO a
       -> t ConfigM a
