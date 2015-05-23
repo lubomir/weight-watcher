@@ -63,7 +63,7 @@ main = runService $ do
         text $ renderRecords (map DB.entityVal rs)
     post "/" $ do
         input <- jsonData
-        _ <- runDB $ do
+        runDB $ do
             prev <- map DB.entityVal <$> DB.selectList [] [DB.Desc RecordDate, DB.LimitTo period]
-            DB.insert $ mkRecord input prev
+            DB.insert_ $ mkRecord input prev
         redirect "/"
