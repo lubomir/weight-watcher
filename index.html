@@ -2,21 +2,29 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Weight Watcher</title>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script type="text/javascript" src="/js/dygraph-combined.js"></script>
 <style>
+body { font-family: 'Open Sans', sans-serif; }
+.dygraph-axis-label {
+    font-size: 9pt;
+}
 .dygraph-axis-label.dygraph-axis-label-x {
     width: 60px;
-    font-size: 10px;
 }
 .dygraph-rangesel-fgcanvas, .dygraph-rangesel-bgcanvas, .dygraph-rangesel-zoomhandle {
     margin-top: 1em;
 }
+#graphdiv {
+    width: 95%;
+    height: 80%;
+    margin: 10px auto;
+}
 </style>
 </head>
 <body>
-<div id="graphdiv"
-  style="width:95%; height:85%;"></div>
+<div id="graphdiv"></div>
 <script type="text/javascript">
   $.get("/data.json").success(function(data) {
           var alpha = 0.1;
@@ -27,7 +35,6 @@
                 avg = data[i]['weight'];
               } else {
                 avg = alpha * data[i]['weight'] + (1 - alpha) * avg;
-                //avg = avg + 0.1 * (data[i]['weight'] - avg);
               }
               d.push([new Date(data[i]['date']), data[i]['weight'], avg])
           };
@@ -41,12 +48,30 @@
         pointSize: 2,
         panEdgeFraction: 0.01,
         labels: ['Date', 'Weight', 'Avg'],
-        "Weight": {
-            drawPoints: true,
-            strokeWidth: 0
+        labelsSeparateLines: true,
+        legend: 'always',
+        labelsDivWidth: 150,
+        labelsDivStyles: {
+            padding: '1em',
+            'background-color': 'rgba(230, 230, 230, 0.65)',
         },
+        gridLineColor: '#cccccc',
+        colors: ['#1F77B4', '#FF7F0E'],
+        series: {
+            Weight: {
+                drawPoints: true,
+                strokeWidth: 0,
+            },
+            Avg: {
+                     strokeWidth: 1.5,
+                 }
+                },
         axes: {
             x: {
+                valueFormatter: function(val, opts, graph) {
+                                    var d = new Date(val);
+                                    return d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate();
+                                },
                 axisLabelFormatter: function(x, gran) {
                     var months = ['led', 'ún', 'bře', 'dub', 'kvě', 'čer',
                     'čec', 'srp', 'zář', 'říj', 'lis', 'pro'];
@@ -63,14 +88,6 @@
         }
     }
   );
-  g.ready(function() {
-      var num = g.numRows();
-      if (num >= 28) {
-          var last = g.getValue(num - 1, 0);
-          var first = g.getValue(num > 28 ? num - 28 : 0, 0);
-          g.updateOptions({dateWindow: [first, 1.01 * last - 0.01 * first]});
-      }
-  });
   });
 </script>
 </body>
