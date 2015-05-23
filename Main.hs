@@ -84,17 +84,12 @@ data Environment = Development
 
 getConfig :: IO Config
 getConfig = do
-    environment <-  getEnvironment
+    environment <- getEnvironment
     pool <- getPool environment
     return Config{..}
 
 getEnvironment :: IO Environment
-getEnvironment = do
-    m <- lookupEnv "SCOTTY_ENV"
-    let e = case m of
-                Nothing -> Development
-                Just s -> read s
-    return e
+getEnvironment = maybe Development read <$> lookupEnv "SCOTTY_ENV"
 
 getPool :: Environment -> IO DB.ConnectionPool
 getPool e = do
@@ -106,12 +101,11 @@ getPool e = do
         Test -> runNoLoggingT (DB.createPostgresqlPool s n)
 
 getConnectionString :: Environment -> IO DB.ConnectionString
-getConnectionString e = do
-    m <- lookupEnv "DATABASE_URL"
-    let s = case m of
-                Nothing -> getDefaultConnectionString e
-                Just u  -> createConnectionString (parseDatabaseUrl u)
-    return s
+getConnectionString e =
+    maybe defConnStr mkConnStr <$> lookupEnv "DATABASE_URL"
+  where
+    defConnStr = getDefaultConnectionString e
+    mkConnStr = createConnectionString . parseDatabaseUrl
 
 getDefaultConnectionString :: Environment -> DB.ConnectionString
 getDefaultConnectionString e =
@@ -132,17 +126,14 @@ createConnectionString l = encodeUtf8 (T.unwords (map f l))
     f (k, v) = T.concat [k, "=", v]
 
 getConnectionSize :: Environment -> Int
+getConnectionSize Production = 4
 getConnectionSize _ = 1
 
 newtype ConfigM a = ConfigM { runConfigM :: ReaderT Config IO a }
                   deriving (Applicative, Functor, Monad, MonadIO, MonadReader Config)
 
 getPort :: IO (Maybe Int)
-getPort = do
-    m <- lookupEnv "PORT"
-    return $ case m of
-        Nothing -> Nothing
-        Just p -> Just (read p)
+getPort = fmap read <$> lookupEnv "PORT"
 
 getSettings :: Environment -> IO Settings
 getSettings e = do
