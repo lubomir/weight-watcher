@@ -2,8 +2,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Weight Watcher</title>
-<script type="text/javascript"
-  src="dygraph-combined.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script type="text/javascript" src="dygraph-combined.js"></script>
 <style>
 .dygraph-axis-label.dygraph-axis-label-x {
     width: 60px;
@@ -18,15 +18,29 @@
 <div id="graphdiv"
   style="width:95%; height:85%;"></div>
 <script type="text/javascript">
+  $.get("/data.json").success(function(data) {
+          var alpha = 0.1;
+          var d = [];
+          var avg = 0;
+          for (var i = 0, len = data.length; i < len; i++) {
+              if (i == 0) {
+                avg = data[i]['weight'];
+              } else {
+                avg = alpha * data[i]['weight'] + (1 - alpha) * avg;
+                //avg = avg + 0.1 * (data[i]['weight'] - avg);
+              }
+              d.push([new Date(data[i]['date']), data[i]['weight'], avg])
+          };
   g = new Dygraph(
     document.getElementById("graphdiv"),
-    "data.csv", // path to CSV file
+    d,
     {
         showRangeSelector: true,
         rightGap: 6,
         leftGap: 6,
         pointSize: 2,
         panEdgeFraction: 0.01,
+        labels: ['Date', 'Weight', 'Avg'],
         "Weight": {
             drawPoints: true,
             strokeWidth: 0
@@ -56,6 +70,7 @@
           var first = g.getValue(num > 28 ? num - 28 : 0, 0);
           g.updateOptions({dateWindow: [first, 1.01 * last - 0.01 * first]});
       }
+  });
   });
 </script>
 </body>

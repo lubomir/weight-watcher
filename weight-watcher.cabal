@@ -27,14 +27,12 @@ executable weight-watcher
                      , transformers
                      , time
                      , aeson
-                     , old-locale
                      , persistent
                      , persistent-postgresql
                      , persistent-template
                      , monad-logger
                      , resourcet
                      , text
-                     , text-format
                      , heroku >= 0.1.2.1
                      , mtl
                      , data-default

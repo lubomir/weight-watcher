@@ -15,5 +15,5 @@ share [mkMigrate "migrateAll", mkPersist sqlSettings] [persistLowerCase|
 Record json
     date    UTCTime
     weight  Double
-    avg     Double
+    deriving Show
 |]
