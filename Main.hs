@@ -5,29 +5,42 @@
 import           Control.Applicative
 import           Control.Monad                        (mzero)
 import           Control.Monad.IO.Class               (MonadIO, liftIO)
-import           Control.Monad.Logger                 (runNoLoggingT, runStdoutLoggingT)
-import           Control.Monad.Trans.Class         (MonadTrans, lift)
-import           Control.Monad.Reader (ReaderT(..), MonadReader, asks)
-import           Data.Aeson (object, (.=), Value(..), FromJSON(..), (.:))
+import           Control.Monad.Logger                 (runNoLoggingT,
+                                                       runStdoutLoggingT)
+import           Control.Monad.Reader                 (MonadReader,
+                                                       ReaderT (..), asks)
+import           Control.Monad.Trans.Class            (MonadTrans, lift)
+import           Data.Aeson                           (FromJSON (..),
+                                                       Value (..), object, (.:),
+                                                       (.=))
+import           Data.Default                         (def)
 import           Data.List                            (genericLength)
-import           Data.Text.Format (format, fixed)
-import qualified Data.Text                       as T
+import qualified Data.Text                            as T
+import           Data.Text.Encoding                   (encodeUtf8)
+import           Data.Text.Format                     (fixed, format)
+import           Data.Text.Lazy                       (Text)
 import qualified Data.Text.Lazy                       as TL
-import Data.Text.Lazy (Text)
-import Data.Text.Encoding (encodeUtf8)
-import Data.Default (def)
-import Network.Wai.Handler.Warp (Settings, defaultSettings, setFdCacheDuration, setPort)
-import Network.Wai.Middleware.RequestLogger (logStdoutDev, logStdout)
-import Network.Wai (Middleware)
-import Network.HTTP.Types.Status (internalServerError500)
+import           Network.HTTP.Types.Status            (internalServerError500)
+import           Network.Wai                          (Middleware)
+import           Network.Wai.Handler.Warp             (Settings,
+                                                       defaultSettings,
+                                                       setFdCacheDuration,
+                                                       setPort)
+import           Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 
-import           Data.Time (UTCTime, formatTime)
-import qualified Database.Persist as DB
-import qualified Database.Persist.Postgresql as DB
-import           System.Environment (lookupEnv)
+import           Data.Time                            (UTCTime, formatTime)
+import qualified Database.Persist                     as DB
+import qualified Database.Persist.Postgresql          as DB
+import           System.Environment                   (lookupEnv)
 import           System.Locale                        (defaultTimeLocale)
-import           Web.Scotty.Trans (Options(..), status, ScottyT, showError, middleware, defaultHandler, setHeader, file, scottyOptsT, get, json, ActionT, redirect, post, text, jsonData)
 import           Web.Heroku
+import           Web.Scotty.Trans                     (ActionT, Options (..),
+                                                       ScottyT, defaultHandler,
+                                                       file, get, json,
+                                                       jsonData, middleware,
+                                                       post, redirect,
+                                                       scottyOptsT, setHeader,
+                                                       showError, status, text)
 
 import Model
 
