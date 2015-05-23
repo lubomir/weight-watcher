@@ -14,7 +14,7 @@ import           Data.Aeson                           (Value (..), object, (.=))
 import           Data.Default                         (def)
 import qualified Data.Text                            as T
 import           Data.Text.Encoding                   (encodeUtf8)
-import           Data.Text.Lazy                       (Text)
+import           Data.Text.Lazy                       (Text, pack)
 import           Network.HTTP.Types.Status            (internalServerError500)
 import           Network.Wai                          (Middleware)
 import           Network.Wai.Handler.Warp             (Settings,
@@ -28,7 +28,7 @@ import           System.Environment                   (lookupEnv)
 import           Web.Heroku
 import           Web.Scotty.Trans                     (ActionT, Options (..),
                                                        ScottyT, defaultHandler,
-                                                       json, middleware,
+                                                       json, middleware, raise,
                                                        scottyOptsT, showError,
                                                        status)
 
@@ -133,6 +133,16 @@ getConfig = do
     environment <- getEnvironment
     pool <- getPool environment
     return Config{..}
+
+getAuthToken :: ActionT Error ConfigM (Maybe Text)
+getAuthToken = do
+    e <- lift (asks environment)
+    tok <- liftIO $ lookupEnv "ADMIN_TOKEN"
+    case tok of
+        Nothing -> if e == Development
+                    then return Nothing
+                    else raise "Production requires authentication settings."
+        Just token -> return $ Just $ pack token
 
 application :: ScottyT Error ConfigM () -> ScottyT Error ConfigM ()
 application app = do
