@@ -5,7 +5,7 @@ import qualified Database.Persist            as DB
 import qualified Database.Persist.Postgresql as DB
 import           Network.HTTP.Types.Status   (created201)
 import           Web.Scotty.Trans            (file, get, json, jsonData, post,
-                                              setHeader, status)
+                                              setHeader, status, param)
 
 import Model
 import WebService
@@ -16,9 +16,10 @@ main = runService $ do
     get "/" $ do
         setHeader "Content-Type" "text/html"
         file "index.html"
-    get "/dygraph-combined.js" $ do
+    get "/js/:file" $ do
         setHeader "Content-Type" "text/javascript"
-        file "dygraph-combined.js"
+        jsFile <- param "file"
+        file $ "js/" ++ jsFile
     get "/data.json" $ do
         rs <- runDB $ DB.selectList [] [DB.Asc RecordDate]
         json rs
