@@ -22,22 +22,22 @@ executable weight-watcher
   -- other-extensions:    
   ghc-options:       -Wall
   build-depends:       base
-                     , scotty
-                     , wai-extra
-                     , transformers
-                     , time
+                     , scotty ==0.9.1
+                     , wai-extra ==3.0.7.1
+                     , transformers ==0.3.0.0
+                     , time ==1.4.2
                      , aeson
-                     , persistent
-                     , persistent-postgresql
-                     , persistent-template
+                     , persistent ==2.1.3
+                     , persistent-postgresql ==2.1.5
+                     , persistent-template ==2.1.3
                      , monad-logger
                      , resourcet
                      , text
                      , heroku >= 0.1.2.1
                      , mtl
                      , data-default
-                     , warp
-                     , wai
+                     , warp ==3.0.12.1
+                     , wai ==3.0.2.3
                      , http-types
   -- hs-source-dirs:      
   default-language:    Haskell2010
