@@ -25,6 +25,9 @@ main = runService $ do
     get "/data.json" $ do
         rs <- runDB $ DB.selectList [] [DB.Asc RecordDate]
         json rs
+    get "/add" $ do
+        setHeader "Content-Type" "text/html"
+        file "add.html"
     post "/" $ do
         tok <- lookup "Authorization" <$> headers
         expected <- getAuthToken
