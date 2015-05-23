@@ -1,24 +1,34 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 import           Control.Applicative
 import           Control.Monad                        (mzero)
-import           Control.Monad.IO.Class               (liftIO)
-import           Control.Monad.Logger                 (runNoLoggingT)
-import           Control.Monad.Trans.Resource         (runResourceT)
-import           Data.Aeson
+import           Control.Monad.IO.Class               (MonadIO, liftIO)
+import           Control.Monad.Logger                 (runNoLoggingT, runStdoutLoggingT)
+import           Control.Monad.Trans.Class         (MonadTrans, lift)
+import           Control.Monad.Reader (ReaderT(..), MonadReader, asks)
+import           Data.Aeson (object, (.=), Value(..), FromJSON(..), (.:))
 import           Data.List                            (genericLength)
-import           Data.Text.Format
-import qualified Data.Text.Lazy                       as T
-import           Data.Time
-import           Database.Persist                     hiding (get)
-import           Database.Persist.Sql                 hiding (get)
-import           Network.Wai.Middleware.RequestLogger
-import           System.Environment
-import           System.Locale                        (defaultTimeLocale)
-import           Web.Scotty
+import           Data.Text.Format (format, fixed)
+import qualified Data.Text                       as T
+import qualified Data.Text.Lazy                       as TL
+import Data.Text.Lazy (Text)
+import Data.Text.Encoding (encodeUtf8)
+import Data.Default (def)
+import Network.Wai.Handler.Warp (Settings, defaultSettings, setFdCacheDuration, setPort)
+import Network.Wai.Middleware.RequestLogger (logStdoutDev, logStdout)
+import Network.Wai (Middleware)
+import Network.HTTP.Types.Status (internalServerError500)
 
-import DBUtils
+import           Data.Time (UTCTime, formatTime)
+import qualified Database.Persist as DB
+import qualified Database.Persist.Postgresql as DB
+import           System.Environment (lookupEnv)
+import           System.Locale                        (defaultTimeLocale)
+import           Web.Scotty.Trans (Options(..), status, ScottyT, showError, middleware, defaultHandler, setHeader, file, scottyOptsT, get, json, ActionT, redirect, post, text, jsonData)
+import           Web.Heroku
+
 import Model
 
 data InputRecord = InputRecord { date :: UTCTime
@@ -41,8 +51,8 @@ renderDate = T.pack . formatTime defaultTimeLocale "%Y-%m-%d"
 mkRecord :: InputRecord -> [Record] -> Record
 mkRecord ir rs = Record (date ir) (weight ir) (average (weight ir : map recordWeight rs))
 
-renderRecords :: [Record] -> T.Text
-renderRecords rs = T.concat (names : map conv rs)
+renderRecords :: [Record] -> Text
+renderRecords rs = TL.concat (names : map conv rs)
   where
     names = "Date,Weight,Avg\n"
     conv (Record {..}) = format "{},{},{}\n" ( renderDate recordDate
@@ -50,27 +60,145 @@ renderRecords rs = T.concat (names : map conv rs)
                                              , fixed 2 recordAvg
                                              )
 
-main :: IO ()
-main = connectDB $ \pool -> do
-    port <- maybe 3000 read <$> lookupEnv "PORT"
-    runNoLoggingT $ runSqlPool (runMigration migrateAll) pool
-    let runDB = liftIO . runNoLoggingT . runResourceT . flip runSqlPool pool
+data Config = Config { environment :: Environment
+                     , pool :: DB.ConnectionPool
+                     }
 
-    scotty port $ do
-        middleware logStdoutDev
-        get "/" $ do
-            setHeader "Content-Type" "text/html"
-            file "index.html"
-        get "/dygraph-combined.js" $ do
-            setHeader "Content-Type" "text/javascript"
-            file "dygraph-combined.js"
-        get "/data.csv" $ do
-            setHeader "Content-Type" "text/plain"
-            rs <- runDB $ selectList [] [Asc RecordDate]
-            text $ renderRecords (map entityVal rs)
-        post "/" $ do
-            input <- jsonData
-            _ <- runDB $ do
-                prev <- map entityVal <$> selectList [] [Desc RecordDate, LimitTo period]
-                insert $ mkRecord input prev
-            redirect "/"
+data Environment = Development
+                 | Production
+                 | Test
+                 deriving (Show, Eq, Read)
+
+getConfig :: IO Config
+getConfig = do
+    environment <-  getEnvironment
+    pool <- getPool environment
+    return Config{..}
+
+getEnvironment :: IO Environment
+getEnvironment = do
+    m <- lookupEnv "SCOTTY_ENV"
+    let e = case m of
+                Nothing -> Development
+                Just s -> read s
+    return e
+
+getPool :: Environment -> IO DB.ConnectionPool
+getPool e = do
+    s <- getConnectionString e
+    let n = getConnectionSize e
+    case e of
+        Development -> runStdoutLoggingT (DB.createPostgresqlPool s n)
+        Production -> runStdoutLoggingT (DB.createPostgresqlPool s n)
+        Test -> runNoLoggingT (DB.createPostgresqlPool s n)
+
+getConnectionString :: Environment -> IO DB.ConnectionString
+getConnectionString e = do
+    m <- lookupEnv "DATABASE_URL"
+    let s = case m of
+                Nothing -> getDefaultConnectionString e
+                Just u  -> createConnectionString (parseDatabaseUrl u)
+    return s
+
+getDefaultConnectionString :: Environment -> DB.ConnectionString
+getDefaultConnectionString e =
+    let n = case e of
+                Development -> "weight_watcher_development"
+                Production  -> "weight_watcher_production"
+                Test        -> "weight_watcher_test"
+    in createConnectionString
+        [ ("host", "localhost")
+        , ("port", "5432")
+        , ("user", "postgres")
+        , ("dbname", n)
+        ]
+
+createConnectionString :: [(T.Text, T.Text)] -> DB.ConnectionString
+createConnectionString l = encodeUtf8 (T.unwords (map f l))
+  where
+    f (k, v) = T.concat [k, "=", v]
+
+getConnectionSize :: Environment -> Int
+getConnectionSize _ = 1
+
+newtype ConfigM a = ConfigM { runConfigM :: ReaderT Config IO a }
+                  deriving (Applicative, Functor, Monad, MonadIO, MonadReader Config)
+
+getPort :: IO (Maybe Int)
+getPort = do
+    m <- lookupEnv "PORT"
+    return $ case m of
+        Nothing -> Nothing
+        Just p -> Just (read p)
+
+getSettings :: Environment -> IO Settings
+getSettings e = do
+    let cache = if e == Development then setFdCacheDuration 0 else id
+    portSetter <- maybe id setPort <$> getPort
+    return $ portSetter $ cache defaultSettings
+
+getOptions :: Environment -> IO Options
+getOptions e = do
+    s <- getSettings e
+    return def { settings = s
+               , verbose = case e of Development -> 1
+                                     _           -> 0
+               }
+
+type Error = Text
+
+runDB :: (MonadTrans t, MonadIO (t ConfigM))
+      => DB.SqlPersistT IO a
+      -> t ConfigM a
+runDB q = do
+    p <- lift (asks pool)
+    liftIO (DB.runSqlPool q p)
+
+loggingM :: Environment -> Middleware
+loggingM Development = logStdoutDev
+loggingM Production  = logStdout
+loggingM Test        = id
+
+type Action = ActionT Error ConfigM ()
+
+defaultH :: Environment -> Error -> Action
+defaultH e x = do
+    status internalServerError500
+    let o = case e of
+                Production -> Null
+                _          -> object ["error" .= showError x]
+    json o
+
+application :: ScottyT Error ConfigM ()
+application = do
+    runDB (DB.runMigration migrateAll)
+    e <- lift (asks environment)
+    middleware (loggingM e)
+    defaultHandler (defaultH e)
+    get "/" $ do
+        setHeader "Content-Type" "text/html"
+        file "index.html"
+    get "/dygraph-combined.js" $ do
+        setHeader "Content-Type" "text/javascript"
+        file "dygraph-combined.js"
+    get "/data.csv" $ do
+        setHeader "Content-Type" "text/plain"
+        rs <- runDB $ DB.selectList [] [DB.Asc RecordDate]
+        text $ renderRecords (map DB.entityVal rs)
+    post "/" $ do
+        input <- jsonData
+        _ <- runDB $ do
+            prev <- map DB.entityVal <$> DB.selectList [] [DB.Desc RecordDate, DB.LimitTo period]
+            DB.insert $ mkRecord input prev
+        redirect "/"
+
+runApplication :: Config -> IO ()
+runApplication c = do
+    o <- getOptions (environment c)
+    let r m = runReaderT (runConfigM m) c
+    scottyOptsT o r r application
+
+main :: IO ()
+main = do
+    c <- getConfig
+    runApplication c
