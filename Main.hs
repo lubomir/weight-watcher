@@ -34,7 +34,7 @@ main = runService $ do
         if tok /= expected
             then do
                 status forbidden403
-                json $ object ["error" .= ("Incorrect or missing auth token." :: Text)]
+                json $ object ["error" .= ("Incorrect auth token." :: Text)]
             else do
                 input <- jsonData
                 runDB $ DB.insert_ (input :: Record)
