@@ -30,6 +30,7 @@
             </div>
             <input type=submit value=Add class="btn btn-primary btn-lg">
         </form>
+        <div class="alert alert-danger" role="alert" id="error"></div>
     </div>
 <script type="text/javascript">
     $("#addForm").on('submit', function () {
@@ -48,9 +49,14 @@
                     data: JSON.stringify({'date': dateStr, 'weight': weight}),
                     headers: {'Authorization': token},
                     success: function () {window.location = '/';},
-                    error: function(xhr) {console.log(xhr.responseText);}});
+                    error: function(xhr) {
+                    console.log(xhr.responseText);
+                    var data = JSON.parse(xhr.responseText);
+                    $("#error").text(data["error"]).show();
+                    }});
             return false;
             });
+    $("#error").hide();
 </script>
 </body>
 </html>
