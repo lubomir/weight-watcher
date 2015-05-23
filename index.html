@@ -1,28 +1,33 @@
+<!DOCTYPE html>
 <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>Weight Watcher</title>
-<link href='http://fonts.googleapis.com/css?family=Open+Sans&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script type="text/javascript" src="/js/dygraph-combined.js"></script>
-<style>
-body { font-family: 'Open Sans', sans-serif; }
-.dygraph-axis-label {
-    font-size: 9pt;
-}
-.dygraph-axis-label.dygraph-axis-label-x {
-    width: 60px;
-}
-.dygraph-rangesel-fgcanvas, .dygraph-rangesel-bgcanvas, .dygraph-rangesel-zoomhandle {
-    margin-top: 1em;
-}
-#graphdiv {
-    width: 95%;
-    height: 80%;
-    margin: 10px auto;
-}
-</style>
-</head>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Weight Watcher</title>
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script type="text/javascript" src="/js/dygraph-combined.js"></script>
+        <style>
+            body { font-family: 'Open Sans', sans-serif; }
+            .dygraph-axis-label {
+                font-size: 9pt;
+            }
+            .dygraph-axis-label.dygraph-axis-label-x {
+                width: 60px;
+            }
+            .dygraph-rangesel-fgcanvas, .dygraph-rangesel-bgcanvas, .dygraph-rangesel-zoomhandle {
+                margin-top: 1em;
+            }
+            #graphdiv {
+                position: absolute;
+                top: 20px;
+                left: 0;
+                right: 35px;
+                bottom: 50px;
+            }
+        </style>
+    </head>
 <body>
 <div id="graphdiv"></div>
 <script type="text/javascript">
