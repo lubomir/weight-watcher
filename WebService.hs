@@ -11,7 +11,6 @@ import           Control.Monad.Reader                 (MonadReader,
                                                        ReaderT (..), asks)
 import           Control.Monad.Trans.Class            (MonadTrans, lift)
 import           Data.Aeson                           (Value (..), object, (.=))
-import           Data.Default                         (def)
 import qualified Data.Text                            as T
 import           Data.Text.Encoding                   (encodeUtf8)
 import           Data.Text.Lazy                       (Text, pack)
@@ -22,6 +21,7 @@ import           Network.Wai.Handler.Warp             (Settings,
                                                        setFdCacheDuration,
                                                        setPort)
 import           Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
+import           Network.Wai.Middleware.Gzip
 
 import qualified Database.Persist.Postgresql          as DB
 import           System.Environment                   (lookupEnv)
@@ -148,6 +148,7 @@ application :: ScottyT Error ConfigM () -> ScottyT Error ConfigM ()
 application app = do
     e <- lift (asks environment)
     middleware (loggingM e)
+    middleware (gzip $ def {gzipFiles = GzipCompress})
     defaultHandler (defaultH e)
     app
 
