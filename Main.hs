@@ -22,6 +22,9 @@ main = runService $ do
     get "/js/dygraph-combined.js" $ do
         setHeader "Content-Type" "text/javascript"
         file "js/dygraph-combined.js"
+    get "/js/moment.min.js" $ do
+        setHeader "Content-Type" "text/javascript"
+        file "js/moment.min.js"
     get "/data.json" $ do
         rs <- runDB $ DB.selectList [] [DB.Asc RecordDate]
         json rs

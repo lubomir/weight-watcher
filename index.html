@@ -8,6 +8,7 @@
         <link href='http://fonts.googleapis.com/css?family=Open+Sans&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script type="text/javascript" src="/js/dygraph-combined.js"></script>
+        <script type="text/javascript" src="/js/moment.min.js"></script>
         <style>
             body { font-family: 'Open Sans', sans-serif; }
             .dygraph-axis-label {
@@ -73,20 +74,17 @@
         axes: {
             x: {
                 valueFormatter: function(val, opts, graph) {
-                                    var d = new Date(val);
-                                    return d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate();
+                                    return moment(val).format('YYYY-MM-DD');
                                 },
                 axisLabelFormatter: function(x, gran) {
-                    var months = ['led', 'ún', 'bře', 'dub', 'kvě', 'čer',
-                    'čec', 'srp', 'zář', 'říj', 'lis', 'pro'];
+                    moment.locale('cs', {monthsShort: 'led_ún_bře_dub_kvě_čer_čec_srp_zář_říj_lis_pro'.split('_')});
                     switch (gran) {
                     case Dygraph.MONTHLY:
-                        return months[x.getMonth()] + "<br>" + x.getFullYear();
+                        return moment(x).format('MMM[<br>]YYYY');
                     case Dygraph.YEARLY:
-                        return x.getFullYear();
+                        return moment(x).format('YYYY');
                     }
-                    var day = x.getDate();
-                    return day + ".&nbsp;" + months[x.getMonth()] + "<br>" + x.getFullYear();
+                    return moment(x).format('D[.&nbsp;]MMM[<br>]YYYY');
                 }
             }
         }
