@@ -7,9 +7,10 @@ import           Data.Text                   (Text)
 import qualified Database.Persist            as DB
 import qualified Database.Persist.Postgresql as DB
 import           Network.HTTP.Types.Status   (created201, forbidden403)
-import           Web.Scotty.Trans            (file, get, headers, json,
+import           Web.Scotty.Trans            (raw, get, headers, json,
                                               jsonData, post, setHeader, status)
 
+import Files
 import Model
 import WebService
 
@@ -18,19 +19,19 @@ main = runService $ do
     runDB (DB.runMigration migrateAll)
     get "/" $ do
         setHeader "Content-Type" "text/html"
-        file "index.html"
+        raw index
     get "/js/dygraph-combined.js" $ do
         setHeader "Content-Type" "text/javascript"
-        file "js/dygraph-combined.js"
+        raw dygraphs
     get "/js/moment.min.js" $ do
         setHeader "Content-Type" "text/javascript"
-        file "js/moment.min.js"
+        raw moment
     get "/data.json" $ do
         rs <- runDB $ DB.selectList [] [DB.Asc RecordDate]
         json rs
     get "/add" $ do
         setHeader "Content-Type" "text/html"
-        file "add.html"
+        raw add
     post "/" $ do
         tok <- lookup "Authorization" <$> headers
         expected <- getAuthToken

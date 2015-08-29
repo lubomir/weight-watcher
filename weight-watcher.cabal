@@ -18,26 +18,30 @@ cabal-version:       >=1.10
 
 executable weight-watcher
   main-is:             Main.hs
-  -- other-modules:       
+  hs-source-dirs:      src
+  other-modules:       Model
+                     , WebService
   -- other-extensions:    
   ghc-options:       -Wall
   build-depends:       base
-                     , scotty ==0.9.1
-                     , wai-extra ==3.0.7.1
-                     , transformers ==0.3.0.0
-                     , time ==1.4.2
+                     , scotty
+                     , wai-extra
+                     , transformers
+                     , time
                      , aeson
-                     , persistent ==2.1.3
-                     , persistent-postgresql ==2.1.5
-                     , persistent-template ==2.1.3
+                     , persistent
+                     , persistent-postgresql
+                     , persistent-template
                      , monad-logger
                      , resourcet
                      , text
-                     , heroku >= 0.1.2.1
                      , mtl
                      , data-default
-                     , warp ==3.0.12.1
-                     , wai ==3.0.2.3
+                     , warp
+                     , wai
                      , http-types
+                     , heroku
+                     , file-embed
+                     , bytestring
   -- hs-source-dirs:      
   default-language:    Haskell2010
