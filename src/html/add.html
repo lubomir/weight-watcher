@@ -35,7 +35,7 @@
 <script type="text/javascript">
     $("#addForm").on('submit', function () {
             var token = $("#token").val();
-            var weight = parseInt($("#weight").val());
+            var weight = parseFloat($("#weight").val());
             var dateStr = $("#date").val();
             if (!dateStr) {
                 var d = new Date();
