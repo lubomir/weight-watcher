@@ -21,6 +21,7 @@ executable weight-watcher
   hs-source-dirs:      src
   other-modules:       Model
                      , WebService
+                     , Files
   -- other-extensions:    
   ghc-options:       -Wall
   build-depends:       base
