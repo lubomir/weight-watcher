@@ -1,0 +1,5 @@
+{
+  "name": "weight-watcher",
+  "image": "heroku/cedar",
+  "addons": []
+}
