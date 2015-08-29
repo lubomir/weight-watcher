@@ -1,1 +1,1 @@
-web: cabal run -- $PORT
+web: /app/user/.local/bin/weight-watcher $PORT

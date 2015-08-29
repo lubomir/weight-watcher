@@ -1,5 +1,5 @@
 {
   "name": "weight-watcher",
   "image": "heroku/cedar",
-  "addons": []
+  "addons": ["heroku-postgresql:hobby-dev"]
 }

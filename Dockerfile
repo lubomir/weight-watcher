@@ -6,16 +6,17 @@ RUN wget -q -O- https://s3.amazonaws.com/download.fpcomplete.com/ubuntu/fpco.key
 
 RUN apt-get update && apt-get install stack -y
 
-RUN useradd -d /app -m app
+RUN mkdir /app
+RUN useradd -d /app/user -m app
 USER app
-WORKDIR app
+WORKDIR /app/user
 
-ENV HOME /app
+ENV HOME /app/user
 ENV PORT 3000
 
-RUN mkdir -p /app/heroku /app/src /app/.profile.d
+RUN mkdir -p /app/user/heroku /app/user/src /app/user/.profile.d
 
-WORKDIR /app/src
+WORKDIR /app/user/src
 
 COPY stack.yaml stack.yaml
 COPY LICENSE LICENSE
@@ -29,4 +30,4 @@ RUN stack build --only-dependencies
 COPY src src
 COPY js js
 
-RUN stack build
+RUN stack build --copy-bins

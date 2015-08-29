@@ -1,7 +1,7 @@
 web:
   build: .
-  command: 'bash -c ''/app/.local/bin/weight-watcher $PORT'''
-  working_dir: /app
+  command: 'bash -c ''/app/user/.local/bin/weight-watcher $PORT'''
+  working_dir: /app/user
   environment:
     PORT: 8080
   ports:
