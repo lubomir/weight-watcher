@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script type="text/javascript" src="/js/moment.min.js"></script>
     <style type="text/css" media="screen">
         body { font-family: 'Open Sans', sans-serif; }
     </style>
@@ -38,10 +39,7 @@
             var weight = parseFloat($("#weight").val());
             var dateStr = $("#date").val();
             if (!dateStr) {
-                var d = new Date();
-                dateStr = d.toISOString();
-            } else {
-                dateStr += "T09:00:00Z";
+                dateStr = moment().format('YYYY-MM-DD');
             }
             $.ajax({type: 'POST',
                     url: '/',
