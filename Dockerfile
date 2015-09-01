@@ -28,6 +28,5 @@ COPY weight-watcher.cabal weight-watcher.cabal
 RUN stack build --only-dependencies
 
 COPY src src
-COPY js js
 
 RUN stack build --copy-bins
