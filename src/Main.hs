@@ -6,9 +6,11 @@ import           Data.Aeson                  (object, (.=))
 import           Data.Text                   (Text)
 import qualified Database.Persist            as DB
 import qualified Database.Persist.Postgresql as DB
-import           Network.HTTP.Types.Status   (created201, forbidden403)
-import           Web.Scotty.Trans            (raw, get, headers, json,
-                                              jsonData, post, setHeader, status)
+import           Network.HTTP.Types.Status   (created201, forbidden403,
+                                              status204, status404)
+import           Web.Scotty.Trans            (delete, get, headers, json,
+                                              jsonData, param, post, raw,
+                                              setHeader, status)
 
 import Files
 import Model
@@ -29,10 +31,10 @@ main = runService $ do
     get "/data.json" $ do
         rs <- runDB $ DB.selectList [] [DB.Asc RecordDate]
         json rs
-    get "/add" $ do
+    get "/admin" $ do
         setHeader "Content-Type" "text/html"
-        raw add
-    post "/" $ do
+        raw admin
+    post "/add" $ do
         tok <- lookup "Authorization" <$> headers
         expected <- getAuthToken
         if tok /= expected
@@ -44,3 +46,20 @@ main = runService $ do
                 runDB $ DB.insert_ (input :: Record)
                 status created201
                 json input
+    delete "/delete/:date" $ do
+        tok <- lookup "Authorization" <$> headers
+        expected <- getAuthToken
+        if tok /= expected
+            then do
+                status forbidden403
+                json $ object ["error" .= ("Incorrect auth token." :: Text)]
+            else do
+                date <- param "date"
+                mrecord <- runDB $ DB.getBy (UniqueRecordDate date)
+                case mrecord of
+                    Nothing -> do
+                        status status404
+                        json $ object ["error" .= ("Record not found." :: Text)]
+                    Just (DB.Entity key _) -> do
+                        runDB $ DB.delete key
+                        status status204
