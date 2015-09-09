@@ -16,6 +16,16 @@ import Files
 import Model
 import WebService
 
+protected :: Action -> Action
+protected act = do
+    tok <- lookup "Authorization" <$> headers
+    expected <- getAuthToken
+    if tok /= expected
+        then do
+            status forbidden403
+            json $ object ["error" .= ("Incorrect auth token." :: Text)]
+        else act
+
 main :: IO ()
 main = runService $ do
     runDB (DB.runMigration migrateAll)
@@ -34,32 +44,18 @@ main = runService $ do
     get "/admin" $ do
         setHeader "Content-Type" "text/html"
         raw admin
-    post "/add" $ do
-        tok <- lookup "Authorization" <$> headers
-        expected <- getAuthToken
-        if tok /= expected
-            then do
-                status forbidden403
-                json $ object ["error" .= ("Incorrect auth token." :: Text)]
-            else do
-                input <- jsonData
-                runDB $ DB.insert_ (input :: Record)
-                status created201
-                json input
-    delete "/delete/:date" $ do
-        tok <- lookup "Authorization" <$> headers
-        expected <- getAuthToken
-        if tok /= expected
-            then do
-                status forbidden403
-                json $ object ["error" .= ("Incorrect auth token." :: Text)]
-            else do
-                date <- param "date"
-                mrecord <- runDB $ DB.getBy (UniqueRecordDate date)
-                case mrecord of
-                    Nothing -> do
-                        status status404
-                        json $ object ["error" .= ("Record not found." :: Text)]
-                    Just (DB.Entity key _) -> do
-                        runDB $ DB.delete key
-                        status status204
+    post "/add" $ protected $ do
+        input <- jsonData
+        runDB $ DB.insert_ (input :: Record)
+        status created201
+        json input
+    delete "/delete/:date" $ protected $ do
+        date <- param "date"
+        mrecord <- runDB $ DB.getBy (UniqueRecordDate date)
+        case mrecord of
+            Nothing -> do
+                status status404
+                json $ object ["error" .= ("Record not found." :: Text)]
+            Just (DB.Entity key _) -> do
+                runDB $ DB.delete key
+                status status204
