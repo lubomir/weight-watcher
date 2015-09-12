@@ -18,7 +18,7 @@ body {
     bottom: 50px;
 }
 .side-link {
-    position: absolute;
+    position: fixed;
     top: 50%;
     height: 60px;
     margin-top: -30px;
