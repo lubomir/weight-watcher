@@ -7,10 +7,11 @@
         <title>Weight Watcher</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
         <link href='http://fonts.googleapis.com/css?family=Open+Sans&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" href="/css/style.css">
+        <link rel="stylesheet" href="/css/style.css" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script type="text/javascript" src="/js/dygraph-combined.js"></script>
         <script type="text/javascript" src="/js/moment.min.js"></script>
+    <script type="text/javascript" src="/js/helpers.js"></script>
     </head>
 <body>
 <div id="graphdiv"></div>
@@ -25,65 +26,7 @@
     </a>
 </div>
 <script type="text/javascript">
-  $.get("/data.json").success(function(data) {
-          var alpha = 0.1;
-          var d = [];
-          var avg = 0;
-          for (var i = 0, len = data.length; i < len; i++) {
-              if (i == 0) {
-                avg = data[i]['weight'];
-              } else {
-                avg = alpha * data[i]['weight'] + (1 - alpha) * avg;
-              }
-              d.push([new Date(data[i]['date']), data[i]['weight'], avg])
-          };
-  g = new Dygraph(
-    document.getElementById("graphdiv"),
-    d,
-    {
-        showRangeSelector: true,
-        xRangePad: 6,
-        pointSize: 2,
-        panEdgeFraction: 0.01,
-        labels: ['Date', 'Weight', 'Avg'],
-        labelsSeparateLines: true,
-        legend: 'always',
-        labelsDivWidth: 150,
-        labelsDivStyles: {
-            padding: '1em',
-            'background-color': 'rgba(230, 230, 230, 0.65)',
-        },
-        gridLineColor: '#cccccc',
-        colors: ['#1F77B4', '#FF7F0E'],
-        series: {
-            Weight: {
-                drawPoints: true,
-                strokeWidth: 0,
-            },
-            Avg: {
-                     strokeWidth: 1.5,
-                 }
-                },
-        axes: {
-            x: {
-                valueFormatter: function(val, opts, graph) {
-                                    return moment(val).format('YYYY-MM-DD');
-                                },
-                axisLabelFormatter: function(x, gran) {
-                    moment.locale('cs', {monthsShort: 'led_ún_bře_dub_kvě_čer_čec_srp_zář_říj_lis_pro'.split('_')});
-                    switch (gran) {
-                    case Dygraph.MONTHLY:
-                        return moment(x).format('MMM[<br>]YYYY');
-                    case Dygraph.YEARLY:
-                        return moment(x).format('YYYY');
-                    }
-                    return moment(x).format('D[.&nbsp;]MMM[<br>]YYYY');
-                }
-            }
-        }
-    }
-  );
-  });
+    $(document).ready(loadData.bind(null, (createGraph.bind(null, "graphdiv"))));
 </script>
 </body>
 </html>

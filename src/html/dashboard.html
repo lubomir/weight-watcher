@@ -11,6 +11,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/js/moment.min.js"></script>
+    <script type="text/javascript" src="/js/helpers.js"></script>
 </head>
 <body>
     <div class="side-link side-right">
@@ -74,58 +75,7 @@
     </div>
 
     <script type="text/javascript">
-        function getDiff(idx, when, data, ident) {
-            for (; idx >= 0; --idx) {
-                if (moment(data[idx][0]).diff(when) < 0) {
-                    var last = data[data.length - 1];
-                    var diff = last[2] - data[idx][2];
-                    var elem = $(ident).text(diff.toFixed(1));
-                    if (diff > 0) {
-                        elem.addClass("text-danger");
-                    } else if (diff < 0) {
-                        elem.addClass("text-success");
-                    }
-                    return idx;
-                }
-            }
-        }
-        $(document).ready(function () {
-        $.get("/data.json").success(function(data) {
-          var alpha = 0.1;
-          var d = [];
-          var avg = 0;
-          for (var i = 0, len = data.length; i < len; i++) {
-              if (i == 0) {
-                avg = data[i]['weight'];
-              } else {
-                avg = alpha * data[i]['weight'] + (1 - alpha) * avg;
-              }
-              d.push([new Date(data[i]['date']), data[i]['weight'], avg])
-          };
-
-            var height = parseInt($("#height").text());
-            var last = d[d.length - 1];
-            var weight = last[2]
-            $("#weight").text(weight.toFixed(1));
-            var bmi = weight / ((height / 100) * (height / 100));
-            $("#bmi").text(bmi.toFixed(1));
-            if (bmi > 30) {
-                $("#bmi").addClass("text-danger");
-            } else if (bmi > 25) {
-                $("#bmi").addClass("text-warning");
-            }
-
-            var lastDate = moment(last[0]);
-            var weekAgo = moment(lastDate).subtract(7, 'days');
-            var monthAgo = moment(lastDate).subtract(1, 'months');
-            var quarterAgo = moment(lastDate).subtract(3, 'months');
-
-            var i = d.length - 1;
-            i = getDiff(i, weekAgo, d, "#trend-w");
-            i = getDiff(i, monthAgo, d, "#trend-m");
-            getDiff(i, quarterAgo, d, "#trend-q");
-        });
-        });
+        $(document).ready(loadData.bind(null, populateDashboard));
     </script>
 </body>
 </html>
