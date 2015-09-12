@@ -7,39 +7,23 @@
         <title>Weight Watcher</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
         <link href='http://fonts.googleapis.com/css?family=Open+Sans&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/css/style.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script type="text/javascript" src="/js/dygraph-combined.js"></script>
         <script type="text/javascript" src="/js/moment.min.js"></script>
-        <style>
-            body { font-family: 'Open Sans', sans-serif; }
-            .dygraph-axis-label {
-                font-size: 9pt;
-            }
-            .dygraph-axis-label.dygraph-axis-label-x {
-                width: 60px;
-            }
-            .dygraph-rangesel-fgcanvas, .dygraph-rangesel-bgcanvas, .dygraph-rangesel-zoomhandle {
-                margin-top: 1em;
-            }
-            #graphdiv {
-                position: absolute;
-                top: 20px;
-                left: 0;
-                right: 35px;
-                bottom: 50px;
-            }
-            #admin-link {
-                position: absolute;
-                bottom: 35px;
-                left: 0;
-            }
-        </style>
     </head>
 <body>
 <div id="graphdiv"></div>
-<a href="/admin" class="btn btn-link btn-lg" id="admin-link">
-    <span class="glyphicon glyphicon-scale"></span>
-</a>
+<div class="side-link side-left">
+    <a href="/dashboard" title="Dashboard">
+        <span class="glyphicon glyphicon-dashboard"></span>
+    </a>
+</div>
+<div class="side-link side-right">
+    <a href="/admin" title="Admin">
+        <span class="glyphicon glyphicon-scale"></span>
+    </a>
+</div>
 <script type="text/javascript">
   $.get("/data.json").success(function(data) {
           var alpha = 0.1;

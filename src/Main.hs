@@ -38,6 +38,9 @@ main = runService $ do
     get "/js/moment.min.js" $ do
         setHeader "Content-Type" "text/javascript"
         raw moment
+    get "/css/style.css" $ do
+        setHeader "Content-Type" "text/css"
+        raw style
     get "/data.json" $ do
         rs <- runDB $ DB.selectList [] [DB.Asc RecordDate]
         json rs
