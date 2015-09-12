@@ -57,3 +57,13 @@ body {
     padding-left: 45px;
     padding-right: 45px;
 }
+.card {
+    border: 1px solid #e5e5e5;
+    border-radius: .25rem;
+    padding: 0.5em 2em 1em 2em;
+    margin-bottom: 2em;
+}
+.card-detail {
+    font-size: 2.5em;
+    font-weight: bold;
+}

@@ -47,6 +47,9 @@ main = runService $ do
     get "/admin" $ do
         setHeader "Content-Type" "text/html"
         raw admin
+    get "/dashboard" $ do
+        setHeader "Content-Type" "text/html"
+        raw dashboard
     post "/add" $ protected $ do
         input <- jsonData
         runDB $ DB.insert_ (input :: Record)
