@@ -53,8 +53,7 @@ body {
 .nav-tabs {
     margin-top: 0.5em;
 }
-@media (min-width: 786px) {
-    .back-link div {
-        margin-top: 42px;
-    }
+.container {
+    padding-left: 45px;
+    padding-right: 45px;
 }
