@@ -3,14 +3,14 @@ module Main (main) where
 
 import           Control.Applicative
 import           Data.Aeson                  (object, (.=))
+import           Data.Maybe                  (maybeToList)
 import           Data.Text                   (Text)
+import qualified Data.Text.Lazy              as TL
 import qualified Database.Persist            as DB
 import qualified Database.Persist.Postgresql as DB
 import           Network.HTTP.Types.Status   (created201, forbidden403,
                                               status204, status404)
-import           Web.Scotty.Trans            (delete, get, headers, json,
-                                              jsonData, param, post, raw,
-                                              setHeader, status)
+import           Web.Scotty.Trans
 
 import Files
 import Model
@@ -25,6 +25,12 @@ protected act = do
             status forbidden403
             json $ object ["error" .= ("Incorrect auth token." :: Text)]
         else act
+
+-- |Get optional parameter. This can only be reasonably used for query
+-- parameters.
+maybeParam :: (Parsable a, ScottyError e, Functor m, Monad m)
+           => TL.Text -> ActionT e m (Maybe a)
+maybeParam name = (Just <$> param name) `rescue` \_ -> return Nothing
 
 main :: IO ()
 main = runService $ do
@@ -45,7 +51,9 @@ main = runService $ do
         setHeader "Content-Type" "text/css"
         raw style
     get "/data.json" $ do
-        rs <- runDB $ DB.selectList [] [DB.Asc RecordDate]
+        msince <- maybeParam "after"
+        let filters = maybeToList $ (RecordDate DB.>.) <$> msince
+        rs <- runDB $ DB.selectList filters [DB.Asc RecordDate]
         json rs
     get "/admin" $ do
         setHeader "Content-Type" "text/html"
