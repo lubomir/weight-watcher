@@ -69,6 +69,7 @@
 
 <script type="text/javascript">
     $("#addForm").on('submit', function () {
+            localStorage.clear();
             var token = $("#addtoken").val();
             var weight = parseFloat($("#weight").val());
             var dateStr = $("#adddate").val();
@@ -89,6 +90,7 @@
             return false;
             });
     $("#delForm").on('submit', function () {
+            localStorage.clear();
             var token = $("#deltoken").val();
             var dateStr = moment($("#deldate").val()).format('YYYY-MM-DD');
             $.ajax({type: 'DELETE',

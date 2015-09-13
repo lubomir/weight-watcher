@@ -110,7 +110,18 @@ function createGraph(ident, data) {
 }
 
 function loadData(callback) {
-    $.get("/data.json").success(function(data) {
+    var url = "/data.json";
+    var oldData = localStorage["data"];
+    if (oldData) {
+        oldData = JSON.parse(oldData);
+        var last = oldData[oldData.length - 1]["date"];
+        url += "?after=" + last;
+    }
+    $.get(url).success(function(data) {
+        if (oldData) {
+            data = oldData.concat(data);
+        }
+        localStorage["data"] = JSON.stringify(data);
         callback(data);
     });
 }
