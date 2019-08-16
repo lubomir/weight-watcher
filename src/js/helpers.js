@@ -114,8 +114,10 @@ function loadData(callback) {
     var oldData = localStorage["data"];
     if (oldData) {
         oldData = JSON.parse(oldData);
-        var last = oldData[oldData.length - 1]["date"];
-        url += "?after=" + last;
+        try {
+            var last = oldData[oldData.length - 1]["date"];
+            url += "?after=" + last;
+        } catch {};
     }
     $.get(url).success(function(data) {
         if (oldData) {
