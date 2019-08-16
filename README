@@ -1,0 +1,11 @@
+Populate database from a dump:
+
+    jq -r <data.json ".[] | \"curl http://localhost:3000/add -X POST -d '\" + (. | tostring) + \"'\" " | bash
+
+To run locally, start database with podman:
+
+    podman run --rm -ti -p 5432:5432 postgres
+
+And run the server:
+
+    stack run
