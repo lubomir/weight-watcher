@@ -25,7 +25,14 @@ function processData(data) {
         if (i == 0) {
             avg = data[i]['weight'];
         } else {
-            avg = alpha * data[i]['weight'] + (1 - alpha) * avg;
+            const diff = (moment(data[i]["date"]) - moment(data[i-1]["date"])) / 86400000;
+            if (diff > 30) {
+                // If more than a month of data is missing, break the trend line.
+                d.push([new Date(moment(data[i]["date"]).subtract(1, "days").format()), NaN, NaN]);
+                avg = data[i]["weight"];
+            } else {
+                avg = alpha * data[i]['weight'] + (1 - alpha) * avg;
+            }
         }
         d.push([new Date(data[i]['date']), data[i]['weight'], avg])
     };
